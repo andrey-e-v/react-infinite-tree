@@ -3,5 +3,4 @@ npm-debug.log
 package-lock.json
 /.nyc_output
 /coverage
-/lib
 /releases
