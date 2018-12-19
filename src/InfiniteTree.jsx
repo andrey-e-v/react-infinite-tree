@@ -56,34 +56,34 @@ export default class extends Component {
 
         // Controls the scroll offset.
         scrollOffset: PropTypes.number,
-        
+
         // Node index to scroll to.
         scrollToIndex: PropTypes.number,
-        
+
         // Callback invoked whenever the scroll offset changes.
         onScroll: PropTypes.func,
 
         // Callback invoked before updating the tree.
         onContentWillUpdate: PropTypes.func,
-        
+
         // Callback invoked when the tree is updated.
         onContentDidUpdate: PropTypes.func,
-        
+
         // Callback invoked when a node is opened.
         onOpenNode: PropTypes.func,
-        
+
         // Callback invoked when a node is closed.
         onCloseNode: PropTypes.func,
-        
+
         // Callback invoked when a node is selected or deselected.
         onSelectNode: PropTypes.func,
-        
+
         // Callback invoked before opening a node.
         onWillOpenNode: PropTypes.func,
-        
+
         // Callback invoked before closing a node.
         onWillCloseNode: PropTypes.func,
-        
+
         // Callback invoked before selecting or deselecting a node.
         onWillSelectNode: PropTypes.func
     };
@@ -260,58 +260,49 @@ export default class extends Component {
         }
 
         return (
-            <div
-                {...props}
-                style={{
-                    outline: 'none',
-                    ...style
+            <VirtualList
+                ref={node => {
+                    this.virtualList = node;
                 }}
-                tabIndex={tabIndex}
-            >
-                <VirtualList
-                    ref={node => {
-                        this.virtualList = node;
-                    }}
-                    width={width}
-                    height={height}
-                    itemCount={count}
-                    itemSize={(index) => {
-                        const node = this.tree.nodes[index];
-                        if (node && node.state.filtered === false) {
-                            return 0;
-                        }
+                width={width}
+                height={height}
+                itemCount={count}
+                itemSize={(index) => {
+                    const node = this.tree.nodes[index];
+                    if (node && node.state.filtered === false) {
+                        return 0;
+                    }
 
-                        if (typeof rowHeight === 'function') {
-                            return rowHeight({
+                    if (typeof rowHeight === 'function') {
+                        return rowHeight({
+                            node: this.tree.nodes[index],
+                            tree: this.tree
+                        });
+                    }
+
+                    return rowHeight; // Number or Array
+                }}
+                renderItem={({ index, style }) => {
+                    let row = null;
+
+                    if (typeof render === 'function') {
+                        const node = this.tree.nodes[index];
+                        if (node && node.state.filtered !== false) {
+                            row = render({
                                 node: this.tree.nodes[index],
                                 tree: this.tree
                             });
                         }
+                    }
 
-                        return rowHeight; // Number or Array
-                    }}
-                    renderItem={({ index, style }) => {
-                        let row = null;
-
-                        if (typeof render === 'function') {
-                            const node = this.tree.nodes[index];
-                            if (node && node.state.filtered !== false) {
-                                row = render({
-                                    node: this.tree.nodes[index],
-                                    tree: this.tree
-                                });
-                            }
-                        }
-
-                        return (
-                            <div key={index} style={style}>
-                                {row}
-                            </div>
-                        );
-                    }}
-                    {...virtualListProps}
-                />
-            </div>
+                    return (
+                        <div key={index} style={style}>
+                            {row}
+                        </div>
+                    );
+                }}
+                {...virtualListProps}
+            />
         );
     }
 };
